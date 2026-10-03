@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Weather Detector</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #0f172a, #1e3a8a, #2563eb);
+        color: white;
+        padding: 40px 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 35px;
+      }
+
+      .header h1 {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        color: #cbd5e1;
+        font-size: 16px;
+      }
+
+      /* Search */
+      .search-box {
+        display: flex;
+        gap: 12px;
+        max-width: 650px;
+        margin: 0 auto 30px;
+      }
+
+      .search-box input {
+        flex: 1;
+        padding: 16px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 14px;
+        outline: none;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        font-size: 16px;
+        backdrop-filter: blur(10px);
+      }
+
+      .search-box input::placeholder {
+        color: #cbd5e1;
+      }
+
+      .search-box input:focus {
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+      }
+
+      .search-box button {
+        padding: 16px 28px;
+        border: none;
+        border-radius: 14px;
+        background: #ffffff;
+        color: #1e3a8a;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.25s ease;
+      }
+
+      .search-box button:hover {
+        transform: translateY(-2px);
+        background: #dbeafe;
+      }
+
+      /* Error */
+      .error {
+        max-width: 650px;
+        margin: 0 auto 25px;
+        padding: 15px 20px;
+        border-radius: 14px;
+        background: rgba(239, 68, 68, 0.18);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        color: #fecaca;
+        text-align: center;
+      }
+
+      /* Main weather card */
+      .weather-card {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 25px;
+        padding: 30px;
+        backdrop-filter: blur(18px);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Location */
+      .location {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .location h2 {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .location p {
+        color: #cbd5e1;
+        font-size: 15px;
+      }
+
+      /* Main weather */
+      .main-weather {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 30px;
+        padding: 25px 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .weather-icon {
+        width: 120px;
+        height: 120px;
+      }
+
+      .temperature {
+        text-align: center;
+      }
+
+      .temperature .value {
+        font-size: 70px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .temperature .unit {
+        font-size: 22px;
+        color: #cbd5e1;
+      }
+
+      .temperature .condition {
+        margin-top: 10px;
+        font-size: 20px;
+        color: #e2e8f0;
+      }
+
+      .feels-like {
+        margin-top: 5px;
+        color: #cbd5e1;
+        font-size: 14px;
+      }
+
+      /* Weather details */
+      .details-title {
+        margin: 30px 0 18px;
+        font-size: 20px;
+      }
+
+      .details {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+      }
+
+      .detail {
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .detail .label {
+        color: #cbd5e1;
+        font-size: 13px;
+        margin-bottom: 8px;
+      }
+
+      .detail .value {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      /* Location details */
+      .location-details {
+        margin-top: 25px;
+        padding-top: 25px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .location-details h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+      }
+
+      .location-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+      }
+
+      /* Footer */
+      .footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #94a3b8;
+        font-size: 13px;
+      }
+
+      /* Responsive */
+      @media (max-width: 800px) {
+        .details {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .location-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 25px 15px;
+        }
+
+        .header h1 {
+          font-size: 32px;
+        }
+
+        .search-box {
+          flex-direction: column;
+        }
+
+        .search-box button {
+          width: 100%;
+        }
+
+        .weather-card {
+          padding: 20px;
+        }
+
+        .main-weather {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .temperature .value {
+          font-size: 58px;
+        }
+
+        .details,
+        .location-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 400px) {
+        .details,
+        .location-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1>🌤️ Weather Detector</h1>
+        <p>Check the current weather anywhere in the world</p>
+      </header>
+
+      <!-- Search -->
+      <form method="POST" class="search-box">
+        {% csrf_token %}
+
+        <input
+          type="text"
+          name="city"
+          placeholder="Enter a city..."
+          value="{{ city }}"
+          required
+        />
+
+        <button type="submit">Search</button>
+      </form>
+
+      <!-- Error -->
+      {% if error %}
+      <div class="error">
+        <strong>⚠️ {{ error }}</strong>
+      </div>
+      {% endif %}
+
+      <!-- Weather -->
+      {% if data.name %}
+
+      <div class="weather-card">
+        <!-- Location -->
+        <div class="location">
+          <h2>{{ data.name }}</h2>
+
+          <p>{{ data.region }}, {{ data.country }}</p>
+        </div>
+
+        <!-- Main weather -->
+        <div class="main-weather">
+          {% if data.icon %}
+          <img
+            class="weather-icon"
+            src="https:{{ data.icon }}"
+            alt="{{ data.weather }}"
+          />
+          {% endif %}
+
+          <div class="temperature">
+            <div>
+              <span class="value">{{ data.temp }}</span>
+              <span class="unit">°C</span>
+            </div>
+
+            <div class="condition">{{ data.weather }}</div>
+
+            <div class="feels-like">Feels like {{ data.feels_like }}°C</div>
+          </div>
+        </div>
+
+        <!-- Weather details -->
+        <h3 class="details-title">Weather Details</h3>
+
+        <div class="details">
+          <div class="detail">
+            <div class="label">💧 Humidity</div>
+            <div class="value">{{ data.humidity }}%</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">🌬️ Wind Speed</div>
+            <div class="value">{{ data.wind_speed }} km/h</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">🧭 Wind Direction</div>
+            <div class="value">{{ data.wind_direction }}</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">☁️ Clouds</div>
+            <div class="value">{{ data.clouds }}%</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">🌧️ Precipitation</div>
+            <div class="value">{{ data.precipitation }} mm</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">👁️ Visibility</div>
+            <div class="value">{{ data.visibility }} km</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">☀️ UV Index</div>
+            <div class="value">{{ data.uv }}</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">🌡️ Pressure</div>
+            <div class="value">{{ data.pressure }} mb</div>
+          </div>
+        </div>
+
+        <!-- Location details -->
+        <div class="location-details">
+          <h3>Location Information</h3>
+
+          <div class="location-grid">
+            <div class="detail">
+              <div class="label">📍 Latitude</div>
+              <div class="value">{{ data.latitude }}</div>
+            </div>
+
+            <div class="detail">
+              <div class="label">📍 Longitude</div>
+              <div class="value">{{ data.longitude }}</div>
+            </div>
+
+            <div class="detail">
+              <div class="label">🕐 Timezone</div>
+              <div class="value">{{ data.timezone }}</div>
+            </div>
+
+            <div class="detail">
+              <div class="label">🕒 Local Time</div>
+              <div class="value">{{ data.localtime }}</div>
+            </div>
+
+            <div class="detail">
+              <div class="label">🔄 Last Updated</div>
+              <div class="value">{{ data.last_updated }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+
+      <!-- Footer -->
+      <div class="footer">Weather data powered by Khelif Abdellah</div>
+    </div>
+  </body>
+</html>
