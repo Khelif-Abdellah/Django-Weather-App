@@ -4,17 +4,23 @@ import json
 import urllib.request
 import urllib.parse
 import urllib.error
+import os
 
+from dotenv import load_dotenv
 
-API_KEY = "edc2a10b081e411ab82123337260310"
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
 
 
 def index(request):
+
     data = {}
     city = ""
     error = ""
 
     if request.method == "POST":
+
         city = request.POST.get("city", "").strip()
 
         if not city:
@@ -22,9 +28,6 @@ def index(request):
 
         else:
             try:
-                # ---------------------------------------------
-                # WeatherAPI - Current Weather
-                # ---------------------------------------------
 
                 encoded_city = urllib.parse.quote(city)
 
@@ -36,33 +39,16 @@ def index(request):
                     "&lang=en"
                 )
 
-                # Send request to WeatherAPI
                 response = urllib.request.urlopen(weather_url)
 
-                # Read response
                 response_data = response.read()
 
-                # Convert JSON -> Python dictionary
                 weather_data = json.loads(response_data)
 
-                # ---------------------------------------------
-                # Location information
-                # ---------------------------------------------
-
                 location = weather_data["location"]
-
-                # ---------------------------------------------
-                # Current weather information
-                # ---------------------------------------------
-
                 current = weather_data["current"]
 
-                # ---------------------------------------------
-                # Prepare data for Django template
-                # ---------------------------------------------
-
                 data = {
-                    # Location
                     "name": location["name"],
                     "region": location["region"],
                     "country": location["country"],
@@ -71,38 +57,24 @@ def index(request):
                     "timezone": location["tz_id"],
                     "localtime": location["localtime"],
 
-                    # Temperature
                     "temp": current["temp_c"],
                     "feels_like": current["feelslike_c"],
 
-                    # Weather
                     "weather": current["condition"]["text"],
                     "icon": current["condition"]["icon"],
 
-                    # Pressure
                     "pressure": current["pressure_mb"],
-
-                    # Humidity
                     "humidity": current["humidity"],
 
-                    # Wind
                     "wind_speed": current["wind_kph"],
                     "wind_direction": current["wind_dir"],
                     "wind_degree": current["wind_degree"],
 
-                    # Clouds
                     "clouds": current["cloud"],
-
-                    # Rain
                     "precipitation": current["precip_mm"],
-
-                    # Visibility
                     "visibility": current["vis_km"],
-
-                    # UV
                     "uv": current["uv"],
 
-                    # Last update
                     "last_updated": current["last_updated"],
                 }
 
